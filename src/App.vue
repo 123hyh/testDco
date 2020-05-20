@@ -1,13 +1,15 @@
 <template>
   <div id="app">
     <h4>测试docker容器</h4>
+    <List />
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
+import List from '@/components/List.vue'
 import axios from 'axios'
 export default {
   async created(){
@@ -24,7 +26,7 @@ export default {
   },
   name: 'App',
   components: {
-    HelloWorld
+    List
   }
 }
 </script>

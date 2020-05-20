@@ -8,8 +8,20 @@
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-
+import axios from 'axios'
 export default {
+  async created(){
+    try {
+      const data = await axios.post('/apis/exchangerate/search/settting/',{
+        pageIndex: 1,
+        pageSize: 10,
+        source: "system"
+      })
+      console.log(data)
+    } catch (error) {
+      console.log(error)
+    }
+  },
   name: 'App',
   components: {
     HelloWorld

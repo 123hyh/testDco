@@ -1,9 +1,10 @@
 <template>
-  <div class="list-component" ref="list-box">
+  <div class="list-component" ref="list-box" >
     <template v-for="(item, i) of tempList" >
       <div
-        :ref="i === start + 5 ? 
-          'list-top' : i === end -5 ? 
+        :data-serial='item'
+        :ref="i === 10 ? 
+          'list-top' : i === tempList.length - 10? 
           'list-bottom' : undefined"   
         :key="item"
       >{{item}}</div>
@@ -21,24 +22,41 @@ export default {
     }
   },
   mounted(){
-    this.handlerVisibled()
+    this.handlerBottomVisible()
   },
   methods:{
-    handlerVisibled(){
+    // 底部可见时事件
+    handlerBottomVisible:(() => {
+      let loading = false;
+      let handler = null;
+      return function() {
       const ob = new IntersectionObserver(([entries])=>{
-      if(entries.isIntersecting){
-        this.start = this.start + 100,
-        this.end = this.end + 100
-        this.tempList = this.list.slice(this.start, this.end)
-        const target = this.$refs['list-box']
-        setTimeout(()=>{
-          target.scrollTop = 0
-          // this.handlerVisibled()
-        })
-      }
-    })
-    ob.observe(this.$refs['list-bottom'][0])
+        if(entries.isIntersecting){
+
+          if ( loading ) return;
+
+          // 打开节流阀
+          handler && clearTimeout(handler)
+          loading = true
+
+          handler = setTimeout(() => {
+
+            const target = this.$refs['list-box']
+            target.scrollTop = target.scrollTop / 2
+            this.tempList = this.list.slice(this.start+=100 - 50, this.end+=100 - 50)
+
+            // 关闭节流阀
+            loading = false;
+
+            // 取消订阅
+            ob.unobserve(entries.target)
+            this.$nextTick(this.handlerBottomVisible)
+          },150)
+        }
+      })
+      ob.observe(this.$refs['list-bottom'][0])
     }
+    })()
   },
   data(){ 
     return  {

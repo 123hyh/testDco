@@ -4,13 +4,16 @@
     <slot name="header"></slot>
     <div class="long-list-container" ref="container" @scroll="handlerScroll">
       <!-- 中间元素 -->
-      <template v-for="item in currentList">
-        <div :key="item" :ref="item | transformRef(currentList)">
-          {{ item }}
+      <template v-for="(item, i) in currentList">
+        <div
+          :key="`current-list-item-${i}`"
+          :ref="i | transformRef(currentList)"
+        >
+          <slot :data="item" />
         </div>
       </template>
 
-      <!-- 支持底部容器高度 -->
+      <!-- 支撑底部容器高度 -->
       <div :style="bottomContainer" ref="container-bottom-box"></div>
     </div>
   </div>
@@ -31,7 +34,7 @@ export default {
   props: {
     list: {
       type: Array,
-      default: () => Array.from({ length: 1000 }).map((_, i) => i),
+      default: () => [],
     },
   },
   data() {
@@ -41,12 +44,20 @@ export default {
       bottomContainer: {
         height: '0px',
       },
-      currentList: this.list.slice(0, 100),
+      currentList: [],
     };
   },
   watch: {
     list: {
-      handler() {},
+      handler() {
+        this.currentList = this.list.slice(0, 100);
+        this.$nextTick(() => {
+          this.$options.mounted.forEach((item) => {
+            console.log(item.toString());
+            item.call(this);
+          });
+        });
+      },
       deep: true,
     },
   },
@@ -113,9 +124,10 @@ export default {
 <style>
 .long-list-box {
   width: 100%;
-  background: #f0f0f0;
 }
 .long-list-box > .long-list-container {
+  background: #f0f0f0;
+
   width: 100%;
   height: 600px;
   overflow: auto;

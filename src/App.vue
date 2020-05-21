@@ -1,42 +1,47 @@
 <template>
   <div id="app">
     <h4>测试docker容器</h4>
- 
-    <img alt="Vue logo" src="./assets/logo.png">
-       <List >
-     
+
+    <img alt="Vue logo" src="./assets/logo.png" />
+    <List :list="list">
+      <template v-slot:header><h2>header</h2></template>
+      <template v-slot="row">
+        <div>{{ row.data }}</div>
+      </template>
     </List>
   </div>
 </template>
 
 <script>
-
-import List from '@/components/LongList.vue'
-import axios from 'axios'
+import List from '@/components/LongList.vue';
+import axios from 'axios';
 
 export default {
-  data(){
+  data() {
     return {
-      list: Array.from({length: 250}).map((_,i)=>({data: i}))
-    }
+      list: [],
+    };
   },
-  async created(){
+  async created() {
+    setTimeout(() => {
+      this.list = Array.from({ length: 100000 }).map((_, i) => ({ data: i }));
+    }, 1000);
     try {
-      const data = await axios.post('/apis/exchangerate/search/settting/',{
+      const data = await axios.post('/apis/exchangerate/search/settting/', {
         pageIndex: 1,
         pageSize: 10,
-        source: "system"
-      })
-      console.log(data)
+        source: 'system',
+      });
+      console.log(data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   },
   name: 'App',
   components: {
-    List
-  }
-}
+    List,
+  },
+};
 </script>
 
 <style>

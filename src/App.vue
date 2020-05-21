@@ -1,17 +1,25 @@
 <template>
   <div id="app">
     <h4>测试docker容器</h4>
-    <List />
+ 
     <img alt="Vue logo" src="./assets/logo.png">
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+       <List >
+     
+    </List>
   </div>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
-import List from '@/components/List.vue'
+
+import List from '@/components/LongList.vue'
 import axios from 'axios'
+
 export default {
+  data(){
+    return {
+      list: Array.from({length: 250}).map((_,i)=>({data: i}))
+    }
+  },
   async created(){
     try {
       const data = await axios.post('/apis/exchangerate/search/settting/',{

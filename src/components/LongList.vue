@@ -54,6 +54,7 @@ export default {
       itemHeight: 0,
       // 当前渲染的列表数据
       currentList: [],
+      // 触发了
     };
   },
 
@@ -161,7 +162,9 @@ export default {
                   INDEX + this.pageSize
                 )
               );
-                // this.$refs['container'].scrollTop  -=this.currentListHeight / 2
+              this.$nextTick(()=>{
+                this.$refs['container'].scrollTop  -=this.currentListHeight / 2   // 移动端的浏览器上存在bug
+              })
             }
           });
         observe.observe(this.$refs['container-bottom-box']);

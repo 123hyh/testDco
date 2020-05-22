@@ -2,7 +2,8 @@
   <div class="long-list-box">
     <!-- 头部 -->
     <slot name="header"></slot>
-    <div class="long-list-container" ref="container" @scroll="handlerScroll">
+    <div class="long-list-container" ref="container">
+      <div ref="container-top-box" :style="topContainerStyle"></div>
       <!-- 中间元素 -->
       <template v-for="(item, i) in currentList">
         <div
@@ -14,7 +15,7 @@
       </template>
 
       <!-- 支撑底部容器高度 -->
-      <div :style="bottomContainer" ref="container-bottom-box"></div>
+      <div :style="bottomContainerStyle" ref="container-bottom-box"></div>
     </div>
   </div>
 </template>
@@ -22,6 +23,7 @@
 <script>
 /* eslint-disable no-debugger */
 export default {
+
   filters: {
     transformRef(item, val) {
       if (item === 1) {
@@ -31,29 +33,36 @@ export default {
       }
     },
   },
+
   props: {
     list: {
       type: Array,
       default: () => [],
     },
+    // 分页条数
+    pageSize:{
+      type: Number,
+      default: 100
+    }
   },
+
   data() {
     return {
+      // 当前分页
       pageIndex: 1,
+      // item的高度
       itemHeight: 0,
-      bottomContainer: {
-        height: '0px',
-      },
+      // 当前渲染的列表数据
       currentList: [],
     };
   },
+
   watch: {
     list: {
       handler() {
-        this.currentList = this.list.slice(0, 100);
+        this.currentList = this.list.slice(0, this.pageSize);
         this.$nextTick(() => {
           this.$options.mounted.forEach((item) => {
-            console.log(item.toString());
             item.call(this);
           });
         });
@@ -61,57 +70,100 @@ export default {
       deep: true,
     },
   },
+
   computed: {
+    
     // 当前item的总高度
     currentListHeight() {
       return this.currentList.length * this.itemHeight || 0;
     },
+
     // 容器的总高度
     totalHeight() {
       return this.list.length * this.itemHeight || 0;
     },
+
+    // 翻页后数据的总高度
+    topContainerHeight(){
+      return  ((this.pageIndex - 1) * this.pageSize) * this.itemHeight
+    },
+
+    // 底部容器的高度
+    bottomContainerStyle(){
+      return {
+        height: this.totalHeight - this.currentListHeight - (this.topContainerHeight / 2) + 'px' || '0px'
+      };
+    },
+    // 顶部容器的高度
+    topContainerStyle(){
+      return {
+        height: this.topContainerHeight / 2 +'px'
+      }
+    }
   },
+
   mounted() {
     const refs =
       this.$refs['container-first-item'] &&
       this.$refs['container-first-item'][0];
+
     // 计算容器内 item 的总高度
     if (refs) {
       this.itemHeight = this.handlerCalcHeight(
         this.$refs['container-first-item'][0]
       );
-      const transNumber = this.handlerCalcHeight(refs);
-      const height = this.currentList.length * transNumber;
-      this.bottomContainer.height =
-        this.list.length * transNumber - height + 'px';
-      this.$nextTick(this.handlerBottom.bind(this));
+      this.$nextTick(()=>{
+        this.handlerBottom()
+        this.handlerTop()
+      });
     }
   },
+
   methods: {
-    handlerScroll() {},
+
     // 计算高度
     handlerCalcHeight(target) {
       const itemHeight = window.getComputedStyle(target).height;
       return +itemHeight.match(/^\d+/)[0];
     },
-    handlerBottom: (() => {
+
+    handlerTop:( () => {
       let observe = null;
-      return function() {
+      return function handlerTop(){
+        observe = observe || new IntersectionObserver(([entris]) => {
+          if(entris.isIntersecting && entris.boundingClientRect.height > 0){
+            this.pageIndex-=1;
+            const INDEX = (this.pageIndex - 1) * this.pageSize  / 2
+            this.currentList = (
+              this.list.slice(
+                INDEX,
+                INDEX + this.pageSize
+              )
+            );
+          }
+        })
+        observe.observe(this.$refs['container-top-box'])
+      }
+    })(),
+    // 底部可见
+    handlerBottom: ( () => {
+      let observe = null;
+      return function handlerBottom() {
         observe =
           observe ||
           new IntersectionObserver(([entris]) => {
             if (entris.isIntersecting) {
               this.pageIndex += 1;
-              this.currentList.push(
-                ...this.list.slice(
-                  (this.pageIndex - 1) * 100,
-                  this.pageIndex * 100
+              const INDEX = (this.pageIndex - 1) * this.pageSize  / 2
+              this.currentList = (
+                this.list.slice(
+                  INDEX,
+                  INDEX + this.pageSize
                 )
               );
-
-              // 减去底部盒子的高度
-              this.bottomContainer.height =
-                this.totalHeight - this.currentListHeight + 'px';
+              this.$nextTick(()=>{
+                this.$refs['container'].scrollTop  -=this.currentListHeight / 2
+              })
             }
           });
         observe.observe(this.$refs['container-bottom-box']);
@@ -125,11 +177,12 @@ export default {
 .long-list-box {
   width: 100%;
 }
+
 .long-list-box > .long-list-container {
   background: #f0f0f0;
-
   width: 100%;
   height: 600px;
   overflow: auto;
+  -webkit-overflow-scrolling:touch;  
 }
 </style>

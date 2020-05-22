@@ -2,7 +2,7 @@
   <div id="app">
     <h4>测试docker容器</h4>
 
-    <img alt="Vue logo" src="./assets/logo.png" />
+    <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
     <List :list="list">
       <template v-slot:header><h2>header</h2></template>
       <template v-slot="row">
@@ -25,7 +25,7 @@ export default {
   async created() {
     setTimeout(() => {
       this.list = Array.from({ length: 100000 }).map((_, i) => ({ data: i }));
-    }, 1000);
+    }, 0);
     try {
       const data = await axios.post('/apis/exchangerate/search/settting/', {
         pageIndex: 1,

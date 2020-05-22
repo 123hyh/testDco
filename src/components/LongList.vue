@@ -126,7 +126,7 @@ export default {
       const itemHeight = window.getComputedStyle(target).height;
       return +itemHeight.match(/^\d+/)[0];
     },
-
+    // 顶部的支撑容器可见
     handlerTop:( () => {
       let observe = null;
       return function handlerTop(){
@@ -145,7 +145,7 @@ export default {
         observe.observe(this.$refs['container-top-box'])
       }
     })(),
-    // 底部可见
+    // 底部的支撑容器可见
     handlerBottom: ( () => {
       let observe = null;
       return function handlerBottom() {
@@ -161,7 +161,7 @@ export default {
                   INDEX + this.pageSize
                 )
               );
-                this.$refs['container'].scrollTop  -=this.currentListHeight / 2
+                // this.$refs['container'].scrollTop  -=this.currentListHeight / 2
             }
           });
         observe.observe(this.$refs['container-bottom-box']);

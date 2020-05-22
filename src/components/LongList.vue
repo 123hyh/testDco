@@ -2,7 +2,6 @@
   <div class="long-list-box">
     <!-- 头部 -->
     <slot name="header"></slot>
-    <h4>{{currentList[0].data}} {{currentList[currentList.length-1].data}}</h4>
     <div class="long-list-container" ref="container">
       <div ref="container-top-box" :style="topContainerStyle"></div>
       <!-- 中间元素 -->
@@ -55,6 +54,10 @@ export default {
       itemHeight: 0,
       // 当前渲染的列表数据
       currentList: [],
+      // 判断当前是不是移动设备
+      isMobile : /\s+Mobile\/.+/.test(window.navigator.userAgent),
+      // 开关（避免在向下滚动时触发到上容器的可见）
+      valve: false
     };
   },
 
@@ -132,7 +135,7 @@ export default {
       let observe = null;
       return function handlerTop(){
         observe = observe || new IntersectionObserver(([entris]) => {
-          if(entris.isIntersecting && entris.boundingClientRect.height > 0){
+          if(entris.isIntersecting && this.valve &&  entris.boundingClientRect.height > 0){
             this.pageIndex-=1;
             const INDEX = (this.pageIndex - 1) * this.pageSize  / 2
             this.currentList = (
@@ -163,7 +166,12 @@ export default {
                 )
               );
               this.$nextTick(()=>{
-                this.$refs['container'].scrollTop  -=this.currentListHeight / 2   // 移动端的浏览器上存在bug
+                if(!this.isMobile){
+                   // 移动端的浏览器上存在bug
+                  this.$refs['container'].scrollTop  -= this.currentListHeight / 2 
+                }
+                // 设置开关
+                this.valve = true
               })
             }
           });

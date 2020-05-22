@@ -2,6 +2,7 @@
   <div class="long-list-box">
     <!-- 头部 -->
     <slot name="header"></slot>
+    <h4>{{currentList[0].data}} {{currentList[currentList.length-1].data}}</h4>
     <div class="long-list-container" ref="container">
       <div ref="container-top-box" :style="topContainerStyle"></div>
       <!-- 中间元素 -->
@@ -54,7 +55,6 @@ export default {
       itemHeight: 0,
       // 当前渲染的列表数据
       currentList: [],
-      // 触发了
     };
   },
 

@@ -161,9 +161,7 @@ export default {
                   INDEX + this.pageSize
                 )
               );
-              this.$nextTick(()=>{
                 this.$refs['container'].scrollTop  -=this.currentListHeight / 2
-              })
             }
           });
         observe.observe(this.$refs['container-bottom-box']);
